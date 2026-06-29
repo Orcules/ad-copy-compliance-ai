@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headlines Generator - AI-Powered Headlines Creation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>Headlines Generator</h1>
+                <p class="subtitle">AI-powered headlines creation with compliance checking</p>
+                <div class="header-badges">
+                    <span class="badge">Multi-language</span>
+                    <span class="badge">Template-based</span>
+                    <span class="badge">Compliance Check</span>
+                    <span class="badge">Export Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Form Section -->
+            <section class="form-section">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>Headlines Generation</h2>
+                        <p class="form-description">Generate compelling headlines from article content</p>
+                    </div>
+                    
+                    <form id="headlineForm" class="headline-form">
+                        <!-- Input Type Toggle -->
+                        <div class="form-group">
+                            <label>Input Type</label>
+                            <div class="input-type-toggle">
+                                <button type="button" id="urlModeBtn" class="toggle-btn active">Article URL</button>
+                                <button type="button" id="textModeBtn" class="toggle-btn">Free Text</button>
+                            </div>
+                        </div>
+
+                        <!-- Multiple Article URLs Input -->
+                        <div class="form-group" id="urlInputSection">
+                            <label>Article URLs (up to 10)</label>
+                            <div id="urlInputsContainer" class="multiple-inputs-container">
+                                <!-- URL inputs will be dynamically added here -->
+                            </div>
+                            <button type="button" id="addUrlBtn" class="add-input-btn" style="display: none;">
+                                + Add Another URL
+                            </button>
+                            <button type="button" id="analyzeAllUrlsBtn" class="analyze-btn" style="margin-top: 15px;">
+                                <span class="btn-text">Analyze All URLs</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <div class="spinner"></div>
+                                    Analyzing...
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Multiple Free Text Inputs -->
+                        <div class="form-group" id="textInputSection" style="display: none;">
+                            <label>Article Content (up to 10)</label>
+                            <div id="textInputsContainer" class="multiple-inputs-container">
+                                <!-- Text inputs will be dynamically added here -->
+                            </div>
+                            <button type="button" id="addTextBtn" class="add-input-btn" style="display: none;">
+                                + Add Another Text
+                            </button>
+                            <button type="button" id="analyzeAllTextsBtn" class="analyze-btn" style="margin-top: 15px;">
+                                <span class="btn-text">Analyze All Texts</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <div class="spinner"></div>
+                                    Analyzing...
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Articles Preview (Multiple) -->
+                        <div id="articlesPreview" class="articles-preview" style="display: none;">
+                            <div class="preview-header">
+                                <h3>Analyzed Articles (<span id="articlesCount">0</span>)</h3>
+                            </div>
+                            <div id="articlesListContainer" class="articles-list-container">
+                                <!-- Articles will be listed here -->
+                            </div>
+                        </div>
+
+                        <!-- Article Preview (Legacy - keeping for single article) -->
+                        <div id="articlePreview" class="article-preview" style="display: none;">
+                            <div class="preview-header">
+                                <h3>Article Information</h3>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-item">
+                                    <label>Title:</label>
+                                    <span id="articleTitle"></span>
+                                </div>
+                                <div class="preview-item">
+                                    <label>Detected Language:</label>
+                                    <span id="articleLanguage"></span>
+                                </div>
+                                <div class="preview-item" id="detectedCountryItem" style="display: none;">
+                                    <label>Detected Country:</label>
+                                    <span id="detectedCountry"></span>
+                                </div>
+                                <div class="preview-item">
+                                    <label>Override by Country (Optional):</label>
+                                    <div class="searchable-select-container">
+                                        <input type="text" id="countrySearch" class="dropdown-search" placeholder="Search countries...">
+                                        <select id="countryOverride" class="country-override searchable-select">
+                                            <option value="">Select country to filter languages</option>
+                                        </select>
+                                    </div>
+                                    <small class="help-text">Selecting a country will show only languages available for that country</small>
+                                </div>
+                                <div class="preview-item">
+                                    <label>Override Language (Optional):</label>
+                                    <div class="searchable-select-container">
+                                        <input type="text" id="languageSearch" class="dropdown-search" placeholder="Search languages...">
+                                        <select id="languageOverride" class="language-override searchable-select">
+                                            <option value="">Loading languages...</option>
+                                            <!-- Languages will be loaded dynamically from Google Sheets -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="preview-item">
+                                    <label>Content Preview:</label>
+                                    <div id="articleContent" class="content-preview"></div>
+                                    <button type="button" id="readMoreBtn" class="read-more-btn" style="display: none;">
+                                        <span class="read-more-text">Read Full Content</span>
+                                        <span class="read-less-text" style="display: none;">Show Less</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Templates Selection -->
+                        <div id="templatesSection" class="form-group" style="display: none;">
+                            <div class="templates-header">
+                                <label>Select Templates</label>
+                                <div class="templates-actions">
+                                    <button type="button" id="selectAllTemplatesBtn" class="select-all-templates-btn">
+                                        Select All
+                                    </button>
+                                    <button type="button" id="refreshTemplatesBtn" class="refresh-btn">
+                                        <span class="refresh-text">Refresh Templates</span>
+                                        <span class="refresh-loading" style="display: none;">
+                                            <div class="spinner-small"></div>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Template Search -->
+                            <div class="template-search">
+                                <input type="text" id="templateSearch" placeholder="Search templates..." class="search-input">
+                                <div class="search-stats">
+                                    <span id="templateCount">0</span> templates available
+                                </div>
+                            </div>
+                            
+                            <div id="templatesContainer" class="templates-container">
+                                <!-- Templates will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Number of Headlines -->
+                        <div id="variantsSection" class="form-group" style="display: none;">
+                            <label for="nVariants">Headlines per Template</label>
+                            <div class="variants-input">
+                                <input type="number" id="nVariants" name="nVariants" min="1" max="20" value="5">
+                                <span class="variants-help">Generate this many headlines for each selected template</span>
+                            </div>
+                            <div class="total-calculation" id="totalCalculation" style="display: none;">
+                                <small>Total headlines: <span id="totalHeadlinesCalc">0</span> templates × <span id="headlinesPerTemplate">5</span> = <span id="totalResult">0</span></small>
+                            </div>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div id="generateSection" class="form-actions" style="display: none;">
+                            <button type="submit" id="generateBtn" class="generate-btn">
+                                <span class="btn-text">Generate Headlines</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <div class="spinner"></div>
+                                    Generating...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h2>Generated Headlines</h2>
+                        <div class="results-actions">
+                            <button id="selectAllBtn" class="select-btn">Select All</button>
+                            <button id="copySelectedBtn" class="copy-selected-btn" disabled>Copy Selected (<span id="selectedCount">0</span>)</button>
+                            <button id="exportJsonBtn" class="export-btn">Export JSON</button>
+                            <button id="exportCsvBtn" class="export-btn">Export CSV</button>
+                            <button id="copyAllBtn" class="copy-btn">Copy All</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Article Navigation (for multiple articles) -->
+                    <div id="articleNavigation" class="article-navigation" style="display: none;">
+                        <button id="prevArticleBtn" class="nav-arrow-btn" title="Previous Article">
+                            <span>◄</span>
+                        </button>
+                        <div class="article-nav-info">
+                            <span class="article-nav-label">Viewing results for:</span>
+                            <span id="currentArticleTitle" class="current-article-title">Article 1</span>
+                            <span class="article-nav-counter">
+                                (<span id="currentArticleIndex">1</span> of <span id="totalArticlesCount">1</span>)
+                            </span>
+                        </div>
+                        <button id="nextArticleBtn" class="nav-arrow-btn" title="Next Article">
+                            <span>►</span>
+                        </button>
+                    </div>
+                    
+                    <div class="results-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Headlines:</span>
+                            <span id="totalHeadlines" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Templates Used:</span>
+                            <span id="templatesUsed" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Language:</span>
+                            <span id="resultsLanguage" class="stat-value">-</span>
+                        </div>
+                    </div>
+
+                    <div id="headlinesContainer" class="headlines-container">
+                        <!-- Headlines will be displayed here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p id="loadingText">Processing...</p>
+            </div>
+        </div>
+
+        <!-- Error Modal -->
+        <div id="errorModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Error</h3>
+                    <button class="modal-close" onclick="closeErrorModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeErrorModal()" class="btn-secondary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
